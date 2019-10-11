@@ -80,6 +80,42 @@ class DevToolsAppState extends State<DevToolsApp> {
   }
 }
 
+/// Manager for URLs and parameters contained in the current route.
+class RouteUrl extends StatelessWidget {
+  const RouteUrl({Key key, this.uri, this.child}) : super(key: key);
+
+  /// The widget below this one in the tree.
+  final Widget child;
+
+  ///
+  final Uri uri;
+
+  @override
+  Widget build(BuildContext context) {
+    return _InheritedRouteUrl(routeUrl: this);
+  }
+
+  /// Retrieves the [Uri] from the current route in the given [context].
+  static Uri of(BuildContext context) {
+    final _InheritedRouteUrl inherited =
+        context.inheritFromWidgetOfExactType(_InheritedRouteUrl);
+    return inherited.routeUrl.uri;
+  }
+}
+
+class _InheritedRouteUrl extends InheritedWidget {
+  _InheritedRouteUrl({this.routeUrl, Key key})
+      : super(key: key, child: routeUrl.child);
+
+  final RouteUrl routeUrl;
+
+  @override
+  bool updateShouldNotify(_InheritedRouteUrl oldWidget) {
+    // TODO: implement updateShouldNotify
+    return oldWidget.routeUrl.uri == routeUrl.uri;
+  }
+}
+
 /// Widget that requires business logic to be loaded before building its
 /// [builder].
 ///
