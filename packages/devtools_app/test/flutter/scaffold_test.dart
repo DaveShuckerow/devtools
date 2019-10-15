@@ -23,6 +23,11 @@ void main() {
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
+
+      expect(
+        find.byType(DevToolsScaffold),
+        matchesGoldenFile('goldens/scaffold/narrow_scaffold.png'),
+      );
     });
 
     testWidgets('displays in full-width mode without error',
@@ -37,6 +42,10 @@ void main() {
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.fullWidthKey), findsOneWidget);
       expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsNothing);
+      expect(
+        find.byType(DevToolsScaffold),
+        matchesGoldenFile('goldens/scaffold/wide_scaffold.png'),
+      );
     });
 
     testWidgets('displays no tabs when only one is given',
@@ -69,6 +78,10 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byKey(k1), findsOneWidget);
       expect(find.byKey(k2), findsNothing);
+      expect(
+        find.byType(DevToolsScaffold),
+        matchesGoldenFile('goldens/scaffold/single_tab_scaffold.png'),
+      );
     });
   });
 }
