@@ -40,6 +40,14 @@ class FrameworkCore {
     @required ErrorReporter errorReporter,
   }) async {
     final Uri uri = explicitUri ?? _getUriFromQuerystring(url);
+    print(
+      '${serviceManager.hasConnection}, ${uri}, ${serviceManager.service.connectedUri}',
+    );
+    if (serviceManager.hasConnection &&
+        isAlreadyConnected(serviceManager.service, uri)) {
+      // We're already connected.
+      return true;
+    }
 
     if (uri != null) {
       final finishedCompleter = Completer<void>();

@@ -112,6 +112,12 @@ Future<VmServiceWrapper> connect(Uri uri, Completer<void> finishedCompleter) {
   return connectedCompleter.future;
 }
 
+bool isAlreadyConnected(VmServiceWrapper service, Uri uri) {
+  return service.connectedUri ==
+          convertToWebSocketUrl(serviceProtocolUrl: uri) ||
+      service.connectedUri == uri;
+}
+
 /// Wraps a broadcast stream as a single-subscription stream to workaround
 /// events being dropped for DOM/WebSocket broadcast streams when paused
 /// (such as in an asyncMap).

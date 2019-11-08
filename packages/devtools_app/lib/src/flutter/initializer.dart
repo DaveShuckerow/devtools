@@ -16,8 +16,8 @@ import 'auto_dispose_mixin.dart';
 import 'common_widgets.dart';
 import 'navigation.dart';
 
-/// Widget that requires business logic to be loaded before building its
-/// [builder].
+/// Widget that requires the [FrameworkCore] to be initialized before building
+/// its [builder].
 ///
 /// See [_InitializerState.build] for the logic that determines whether the
 /// business logic is loaded.
@@ -104,12 +104,10 @@ class _InitializerState extends State<Initializer>
   void _navigateToConnectPage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_checkLoaded() && ModalRoute.of(context).isCurrent) {
-        // If this route is on top and the app is not loaded, then we navigate to
-        // the /connect page to get a VM Service connection for serviceManager.
-        // When it completes, the serviceManager will notify this instance.
-        Navigator.of(context).pushNamed(
-          routeNameWithQueryParams(context, '/connect'),
-        );
+        // If this route is on top and the app is not loaded, then we need to
+        // return to the connection page to get a VM Service connection for
+        // serviceManager.
+        Navigator.of(context).pop();
       }
     });
   }

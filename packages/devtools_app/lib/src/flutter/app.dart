@@ -27,7 +27,7 @@ class DevToolsApp extends StatefulWidget {
   State<DevToolsApp> createState() => DevToolsAppState();
 }
 
-/// Initializer for the [FrameworkCore] and the app's navigation.
+/// Initializer for the themeing and app navigation.
 ///
 /// This manages the route generation, and marshalls URL query parameters into
 /// flutter route parameters.
@@ -95,26 +95,30 @@ class DevToolsAppState extends State<DevToolsApp> {
 
   /// The routes that the app exposes.
   final Map<String, UrlParametersBuilder> _routes = {
-    '/': (_, params) => Initializer(
-          url: params['uri'],
-          builder: (_) => DevToolsScaffold(
-            tabs: [
-              const InspectorScreen(),
-              const TimelineScreen(),
-              const PerformanceScreen(),
-              EmptyScreen.memory,
-              const DebuggerScreen(),
-              const LoggingScreen(),
-              const InfoScreen(),
-            ],
-            actions: [
-              HotReloadButton(),
-              HotRestartButton(),
-            ],
-          ),
+    '/': (_, params) {
+      final uri = params['uri'];
+      if (uri == null) {
+        return DevToolsScaffold.withChild(child: ConnectScreenBody());
+      }
+      return Initializer(
+        url: params['uri'],
+        builder: (_) => DevToolsScaffold(
+          tabs: [
+            const InspectorScreen(),
+            const TimelineScreen(),
+            const PerformanceScreen(),
+            EmptyScreen.memory,
+            const DebuggerScreen(),
+            const LoggingScreen(),
+            const InfoScreen(),
+          ],
+          actions: [
+            HotReloadButton(),
+            HotRestartButton(),
+          ],
         ),
-    '/connect': (_, __) =>
-        DevToolsScaffold.withChild(child: ConnectScreenBody()),
+      );
+    },
   };
 
   @override

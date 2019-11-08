@@ -135,7 +135,7 @@ class _ConnectScreenBodyState extends State<ConnectScreenBody> {
     );
     if (connected) {
       unawaited(
-        Navigator.popAndPushNamed(
+        Navigator.pushNamed(
           context,
           routeNameWithQueryParams(context, '/', {'uri': '$uri'}),
         ),
