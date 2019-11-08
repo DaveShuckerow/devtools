@@ -113,9 +113,12 @@ Future<VmServiceWrapper> connect(Uri uri, Completer<void> finishedCompleter) {
 }
 
 bool isAlreadyConnected(VmServiceWrapper service, Uri uri) {
-  return service.connectedUri ==
-          convertToWebSocketUrl(serviceProtocolUrl: uri) ||
-      service.connectedUri == uri;
+  if (service == null) {
+    return false;
+  }
+  return service != null &&
+      (service.connectedUri == convertToWebSocketUrl(serviceProtocolUrl: uri) ||
+          service.connectedUri == uri);
 }
 
 /// Wraps a broadcast stream as a single-subscription stream to workaround

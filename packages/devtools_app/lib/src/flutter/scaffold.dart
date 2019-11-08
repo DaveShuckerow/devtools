@@ -172,7 +172,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   /// depending on the screen width.
   Widget _buildAppBar() {
     const title = Text('Dart DevTools');
-    Widget flexibleSpace;
+    Widget flexibleSpace = const SizedBox();
     Size preferredSize;
     if (widget.tabs.length > 1) {
       final tabs = TabBar(
@@ -214,12 +214,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       flexibleSpace: flexibleSpace,
     );
 
-    if (flexibleSpace == null) return appBar;
     return PreferredSize(
       key: isNarrow
           ? DevToolsScaffold.narrowWidthKey
           : DevToolsScaffold.fullWidthKey,
-      preferredSize: preferredSize,
+      preferredSize: preferredSize ?? appBar.preferredSize,
       // Place the AppBar inside of a Hero widget to keep it the same
       // across route transitions.
       child: Hero(
