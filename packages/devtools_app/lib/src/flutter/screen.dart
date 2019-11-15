@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:flutter_icons/flutter_icons.dart';
 
 import 'scaffold.dart';
 
@@ -27,16 +26,6 @@ abstract class Screen {
 /// A placeholder screen that hasn't been implemented.
 class EmptyScreen extends Screen {
   const EmptyScreen(String name, this.icon) : super(name);
-
-  static final EmptyScreen memory = EmptyScreen(
-    'Memory',
-    Octicons.getIconData('package'),
-  );
-
-  static final EmptyScreen logging = EmptyScreen(
-    'Logging',
-    Octicons.getIconData('clippy'),
-  );
 
   /// The icon to show for this screen in a tab.
   final IconData icon;
