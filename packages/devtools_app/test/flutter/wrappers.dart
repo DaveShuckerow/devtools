@@ -17,14 +17,7 @@ import '../support/mocks.dart';
 /// This includes a [MaterialApp] to provide context like [Theme.of].
 /// It also provides a [Material] to support elements like [TextField] that
 /// draw ink effects.
-Widget wrap(Widget widget) {
-  return MaterialApp(
-    theme: themeFor(isDarkTheme: false),
-    home: Material(child: widget),
-  );
-}
-
-Widget wrapWithProvidedController(
+Widget wrap(
   Widget widget, {
   LoggingController loggingController,
   TimelineController timelineController,
