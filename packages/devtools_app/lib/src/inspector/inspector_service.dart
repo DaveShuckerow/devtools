@@ -1028,6 +1028,12 @@ class ObjectGroup {
       'decodeJson',
       () => instanceRefToJson(result),
     );
+    assert(() {
+      print(
+        'JSON length: ${result.length}, ${json.toString().substring(0, 100)}',
+      );
+      return true;
+    }());
     return await _debugTime(
       'parseDiagnostics',
       () => parseDiagnosticsNodeDaemon(Future.value(json)),

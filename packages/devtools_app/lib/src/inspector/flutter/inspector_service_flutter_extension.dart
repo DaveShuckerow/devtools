@@ -16,9 +16,9 @@ extension InspectorFlutterService on ObjectGroup {
         '  render.crossAxisAlignment = $crossAxisAlignment;'
         '  render.markNeedsLayout();'
         '})()';
-    final val = await inspectorLibrary.eval(
-      command,
-      isAlive: this,
+    final val = await _debugTime(
+      'invokeTweakFlexProperties',
+      () => inspectorLibrary.eval(command, isAlive: this),
     );
     return val;
   }
@@ -32,10 +32,29 @@ extension InspectorFlutterService on ObjectGroup {
         '  parentData.flex = $flexFactor;'
         '  render.markNeedsLayout();'
         '})()';
-    final val = await inspectorLibrary.eval(
-      command,
-      isAlive: this,
+    final val = await _debugTime(
+      'invokeTweakFlexFactor',
+      () => inspectorLibrary.eval(command, isAlive: this),
     );
     return val;
   }
+}
+
+Future<T> _debugTime<T>(String name, Future<T> Function() toTime) async {
+  DateTime start;
+  assert(() {
+    start = DateTime.now();
+    print('Starting $name at $start');
+    return true;
+  }());
+
+  final result = await toTime();
+
+  assert(() {
+    final end = DateTime.now();
+    print(
+        'Finishing $name at $end\nTook ${end.millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms');
+    return true;
+  }());
+  return result;
 }

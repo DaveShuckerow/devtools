@@ -105,7 +105,9 @@ class EvalOnDartLibrary {
 
     try {
       LibraryRef libraryRef;
+      int count = 0;
       while (true) {
+        count++;
         libraryRef = await _libraryRef.future;
         if (_libraryRef.isCompleted) {
           // Avoid race condition where a new isolate loaded
@@ -113,6 +115,7 @@ class EvalOnDartLibrary {
           break;
         }
       }
+      print('retried $count times');
       if (libraryRef == null) return null;
       final result = await service.evaluate(
         _isolateId,
