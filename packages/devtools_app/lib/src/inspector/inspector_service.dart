@@ -1020,9 +1020,38 @@ class ObjectGroup {
       return WidgetInspectorService.instance._safeJsonEncode(result);
     ''';
     command = '((){${command.split('\n').join()}})()';
-    final result = await inspectorLibrary.eval(command, isAlive: this);
-    return await parseDiagnosticsNodeDaemon(instanceRefToJson(result));
+    final result = await _debugTime(
+      'Eval',
+      () => inspectorLibrary.eval(command, isAlive: this),
+    );
+    final json = await _debugTime(
+      'decodeJson',
+      () => instanceRefToJson(result),
+    );
+    return await _debugTime(
+      'parseDiagnostics',
+      () => parseDiagnosticsNodeDaemon(Future.value(json)),
+    );
   }
+}
+
+Future<T> _debugTime<T>(String name, Future<T> Function() toTime) async {
+  DateTime start;
+  assert(() {
+    start = DateTime.now();
+    print('Starting $name at $start');
+    return true;
+  }());
+
+  final result = await toTime();
+
+  assert(() {
+    final end = DateTime.now();
+    print(
+        'Finishing $name at $end\nTook ${end.millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms');
+    return true;
+  }());
+  return result;
 }
 
 enum FlutterTreeType {

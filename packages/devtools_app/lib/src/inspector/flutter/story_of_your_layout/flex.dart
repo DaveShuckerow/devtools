@@ -271,35 +271,58 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   /// required for getting all information required for visualizing Flex layout
   Future<FlexLayoutProperties> fetchFlexLayoutProperties() async {
-    objectGroupManager?.cancelNext();
-    final nextObjectGroup = objectGroupManager.next;
-    final node = await nextObjectGroup.getDetailsSubtreeWithRenderObject(
-      getRoot(selectedNode),
-      subtreeDepth: 1,
-    );
-    if (!nextObjectGroup.disposed) {
-      assert(objectGroupManager.next == nextObjectGroup);
-      objectGroupManager.promoteNext();
-    }
-    return FlexLayoutProperties.fromDiagnostics(node);
+    return await _debugTime('FetchFlexLayoutProperties', () async {
+      objectGroupManager?.cancelNext();
+      final nextObjectGroup = objectGroupManager.next;
+      final node = await nextObjectGroup.getDetailsSubtreeWithRenderObject(
+        getRoot(selectedNode),
+        subtreeDepth: 1,
+      );
+      if (!nextObjectGroup.disposed) {
+        assert(objectGroupManager.next == nextObjectGroup);
+        objectGroupManager.promoteNext();
+      }
+      return FlexLayoutProperties.fromDiagnostics(node);
+    });
   }
 
   String id(RemoteDiagnosticsNode node) => node?.dartDiagnosticRef?.id;
 
+  Future<T> _debugTime<T>(String name, Future<T> Function() toTime) async {
+    DateTime start;
+    assert(() {
+      start = DateTime.now();
+      print('Starting $name at $start');
+      return true;
+    }());
+
+    final result = await toTime();
+
+    assert(() {
+      final end = DateTime.now();
+      print(
+          'Finishing $name at $end\nTook ${end.millisecondsSinceEpoch - start.millisecondsSinceEpoch}ms');
+      return true;
+    }());
+    return result;
+  }
+
   Future<void> _onInspectorSelectionChanged() async {
-    if (!mounted) return;
-    if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
-      return;
-    }
-    final prevRootId = id(_properties?.node);
-    final newRootId = id(getRoot(selectedNode));
-    final shouldFetch = prevRootId != newRootId;
-    if (shouldFetch) {
-      final newSelection = await fetchFlexLayoutProperties();
-      _setProperties(newSelection);
-    } else {
-      _setProperties(_properties);
-    }
+    return await _debugTime('Inspector Selection Changed', () async {
+      if (!mounted) return;
+      if (!StoryOfYourFlexWidget.shouldDisplay(selectedNode)) {
+        return;
+      }
+      final prevRootId = id(_properties?.node);
+      final newRootId = id(getRoot(selectedNode));
+      final shouldFetch = prevRootId != newRootId;
+      if (shouldFetch) {
+        final newSelection = await fetchFlexLayoutProperties();
+        _setProperties(newSelection);
+      } else {
+        _setProperties(_properties);
+      }
+    });
   }
 
   void _updateHighlighted(FlexLayoutProperties newProperties) {
@@ -378,6 +401,42 @@ class _StoryOfYourFlexWidgetState extends State<StoryOfYourFlexWidget>
 
   Future<void> updateChildFlex(
       LayoutProperties oldProperties, LayoutProperties newProperties) async {
+    // TODO(DO NOT SUBMIT): don't overwrite a running animation to make this change.
+    // Fetch the updated sizes after the app re-lays-out its children.
+    final index = properties.children.indexOf(oldProperties);
+    if (index != -1) {
+      final newChildren = properties.children.toList();
+      newChildren[index] = newProperties;
+      // Recompute the sizes of the children.
+      double mainAxisSizes = 0.0;
+      num flexes = 0;
+      for (var child in newChildren) {
+        if (!child.hasFlexFactor) {
+          mainAxisSizes += child.dimension(properties.direction);
+        } else {
+          flexes += child.flexFactor;
+        }
+      }
+      final remainingSpace = properties.mainAxisDimension - mainAxisSizes;
+      // Lay out flex space.
+      for (var i = 0; i < newChildren.length; i++) {
+        final child = newChildren[i];
+        if (child.hasFlexFactor) {
+          final flexFraction = remainingSpace * child.flexFactor / flexes;
+          final width = properties.isMainAxisHorizontal
+              ? flexFraction
+              : child.dimension(Axis.horizontal);
+          final height = properties.isMainAxisVertical
+              ? flexFraction
+              : child.dimension(Axis.vertical);
+          newChildren[i] = child.copyWith(
+            size: Size(width, height),
+          );
+        }
+      }
+      newProperties = properties.copyWith(children: newChildren);
+      _changeProperties(newProperties);
+    }
     final updatedProperties = await fetchFlexLayoutProperties();
     _changeProperties(updatedProperties);
   }
